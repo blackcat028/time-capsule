@@ -1,0 +1,2690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Time Capsule</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+    }
+
+    html, body { width: 100%; height: 100%; }
+
+    body {
+      background-color: var(--black);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      background-size: 180px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 5rem 0 6rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page { display: none; text-align: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
+    .page.active { display: block; }
+
+    }
+
+    .page-divider { width: 30px; height: 1px; background: rgba(255,255,255,0.2); margin: 1.5rem auto; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0.8rem 1.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      background: transparent;
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      width: 68px;
+      height: 58px;
+      flex-shrink: 0;
+    }
+
+    .nav-item:active { transform: scale(0.91); }
+
+    .nav-item.active {
+      background: var(--white);
+      border-color: var(--white);
+      box-shadow: 0 0 24px rgba(255,255,255,0.18);
+    }
+
+    .nav-icon {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.4);
+      transition: color 0.3s ease;
+    }
+
+    .nav-item.active .nav-icon { color: var(--black); }
+
+    .nav-label {
+      font-size: 0.46rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      transition: color 0.3s ease;
+    }
+
+    .nav-item.active .nav-label { color: var(--black); }
+
+    svg { width: 20px; height: 20px; fill: currentColor; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (min-width: 768px) {
+      .bottom-nav {
+        max-width: 500px;
+        left: 50%; right: auto;
+        transform: translateX(-50%);
+        border-radius: 20px 20px 0 0;
+        padding: 1rem 2.5rem 1.5rem;
+      }
+    }
+    
+    .profile-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 99;
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.2rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.profile-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #ccc;
+  border: 2px solid var(--black);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--black);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.profile-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(0,0,0,0.7);
+  letter-spacing: 0.2em;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+}
+
+.profile-header.hidden {
+  display: none;
+}
+
+/* HAMBURGER BUTTON */
+.hamburger {
+  position: fixed;
+  top: 0.9rem;
+  right: 1rem;
+  z-index: 200;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger span {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: var(--black);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+}
+
+.hamburger.open span {
+  background: var(--white);
+}
+
+.hamburger span:nth-child(1) { transform: translateY(-7px); }
+.hamburger span:nth-child(2) { transform: translateY(0px); }
+.hamburger span:nth-child(3) { transform: translateY(7px); }
+
+/* Hamburger → X */
+.hamburger.open span:nth-child(1) {
+  transform: translateY(0) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(0) rotate(-45deg);
+}
+
+/* OVERLAY */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 149;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  top: 0; right: 0;
+  height: 100%;
+  width: 75%;
+  max-width: 300px;
+  z-index: 150;
+  background: rgba(15,15,15,0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255,255,255,0.15);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 2rem 2rem;
+  gap: 0.5rem;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+
+.drawer-item {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.drawer-item:hover,
+.drawer-item:active {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  color: var(--white);
+}
+
+.hamburger.hidden {
+  display: none;
+}
+
+.home-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem 0 0 0;
+  gap: 0.5rem;
+}
+
+.badge-box {
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0;
+}
+
+.exp-track {
+  flex: 1;
+  min-width: 250px;
+  height: 20px;
+  background: var(--black);
+  border: 2px solid var(--white);
+  padding: 2px;
+  overflow: hidden;
+}
+
+.exp-bar {
+  height: 100%;
+  background: var(--white);
+  transition: width 1s ease;
+  width: 0%;
+}
+
+.exp-percent {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  color: white;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.profile-page-content {
+  width: 100%;
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.profile-photo-box {
+  width: 120px;
+  height: calc(90px * 16 / 9);
+  overflow: hidden;
+  border: 2px solid var(--white);
+  flex-shrink: 0;
+}
+
+.profile-photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 4.3rem 0 0 0.8rem;
+}
+
+.profile-info-item {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  color: white;
+  letter-spacing: 0.1em;
+  line-height: 1.8;
+}
+
+.profile-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 1rem 0 0 0;
+}
+
+.profile-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--white);
+  margin-top: 1.2rem;
+}
+
+.profile-card {
+  flex: 1;
+  height: 40px;
+  border: 2px solid var(--white);
+  background: transparent;
+}
+
+.profile-card i {
+  font-size: 1.4rem;
+  color: var(--white);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card.active {
+  background: var(--white);
+}
+
+.profile-card.active i {
+  color: var(--black);
+}
+
+.lab-carousel-wrapper {
+  width: 100%;
+  height: calc(100vh - 11rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
+
+.lab-carousel {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: calc(60vw * 16 / 9);
+}
+
+.lab-title-bar {
+  width: 100%;
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  padding: 0.85rem 1rem;
+  margin-top: -3rem;
+}
+
+.lab-card {
+  position: absolute;
+  width: 60vw;
+  height: calc(50vw * 16 / 9);
+  background: var(--white);
+  border: 2px solid var(--white);
+  transition: all 0.4s ease;
+  flex-shrink: 0;
+}
+
+.lab-card.center {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  z-index: 3;
+}
+
+.lab-card.left {
+  transform: translateX(-55vw) scale(0.85);
+  opacity: 0.3;
+  z-index: 2;
+}
+
+.lab-card.right {
+  transform: translateX(55vw) scale(0.85);
+  opacity: 0.3;
+  z-index: 2;
+}
+
+.lab-card.hidden {
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lab-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.lab-btn {
+  width: 80px;
+  height: 44px;
+  background: var(--black);
+  border: 2px solid var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.lab-btn i {
+  font-size: 1rem;
+  color: var(--white);
+  transition: color 0.2s ease;
+}
+
+.lab-btn.active {
+  background: var(--white);
+  border-color: var(--white);
+}
+
+.lab-btn.active i {
+  color: var(--black);
+}
+
+.lab-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lab-card.center {
+  cursor: pointer;
+}
+
+.lab-card.center:active {
+  transform: translateX(0) scale(1.04);
+  transition: transform 0.2s ease;
+}
+
+.robot-wrapper {
+  width: 100%;
+  height: calc(100vh - 11rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  position: relative;
+}
+
+.robot-svg {
+  width: 220px;
+  height: auto;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,0.15));
+  animation: robotFloat 3s ease-in-out infinite;
+}
+
+.robot-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.4em;
+  margin-top: -3rem;
+}
+
+.robot-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+@keyframes robotFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes kedip {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.05); }
+}
+
+.mata-kiri {
+  transform-origin: 42px 25px;
+  animation: kedip 4s ease-in-out infinite;
+}
+
+.mata-kanan {
+  transform-origin: 58px 25px;
+  animation: kedip 4s ease-in-out infinite;
+}
+
+@keyframes ngomong {
+  0%, 100% { transform: scaleY(0.15); }
+  50% { transform: scaleY(1); }
+}
+
+.mulut {
+  transform-origin: 50px 39.5px;
+  transform: scaleY(0.15);
+}
+
+.mulut.bicara {
+  animation: ngomong 0.4s ease-in-out infinite;
+}
+
+@keyframes sapa {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-10deg); }
+}
+
+.tangan-kanan {
+  transform-origin: 78px 75px;
+  animation: sapa 1.5s ease-in-out infinite;
+}
+
+@keyframes gerak-kiri {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+}
+
+.tangan-kiri {
+  transform-origin: 22px 75px;
+  animation: gerak-kiri 1.5s ease-in-out infinite;
+}
+
+.speech-bubble {
+  position: absolute;
+  top: -2rem;
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  max-width: 180px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 10;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 7px 0;
+  border-style: solid;
+  border-color: var(--white) transparent transparent;
+}
+
+.speech-bubble.show {
+  opacity: 1;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.8em;
+  background: var(--black);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: kursor 0.7s step-end infinite;
+}
+
+@keyframes kursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.globe-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+#globeCanvas {
+  width: 280px;
+  height: 280px;
+  cursor: grab;
+  touch-action: none;
+}
+
+#globeCanvas:active {
+  cursor: grabbing;
+}
+
+.globe-text-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 2rem;
+  padding-left: 0;
+}
+
+.breath-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+  padding-left: 1.2rem;
+}
+
+.breath-bar-row {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.breath-fill {
+  color: var(--white);
+}
+
+.breath-empty {
+  opacity: 0.15;
+}
+
+.breath-val {
+  font-size: 0.55rem;
+  opacity: 0.6;
+  letter-spacing: 0.1em;
+  width: 3rem;
+}
+
+.globe-text-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 1rem;
+  padding: 0;
+}
+
+.alien-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.15em;
+  line-height: 2;
+  text-align: left;
+  padding-right: 1.2rem;
+  white-space: pre;
+}
+
+.alien-cursor {
+  animation: kursor 0.7s step-end infinite;
+  color: white;
+}
+
+.drawer-footer {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--white);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.setting-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.setting-overlay.open {
+  display: flex;
+}
+
+.setting-panel {
+  width: 80%;
+  max-width: 320px;
+  background: rgba(10,10,10,0.95);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.setting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: var(--white);
+  letter-spacing: 0.3em;
+}
+
+.setting-close {
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.setting-close:active { opacity: 1; }
+
+.setting-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.setting-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.3em;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.setting-icon {
+  font-size: 0.9rem;
+}
+
+input[type="range"] {
+  flex: 1;
+  appearance: none;
+  height: 2px;
+  background: rgba(255,255,255,0.3);
+  outline: none;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--white);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.setting-btn {
+  flex: 1;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 0.6rem 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: var(--white);
+  letter-spacing: 0.15em;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.setting-btn:active {
+  background: rgba(255,255,255,0.1);
+}
+
+.music-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.5rem 1rem;
+}
+
+.music-arrow {
+  font-size: 1.4rem;
+  color: var(--white);
+  cursor: pointer;
+  padding: 0 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.music-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: var(--white);
+  letter-spacing: 0.15em;
+}
+
+.drawer-setting-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.drawer-setting-card:active {
+  background: rgba(255,255,255,0.08);
+}
+
+.drawer-setting-card i {
+  font-size: 1rem;
+  color: var(--white);
+}
+
+a.drawer-setting-card {
+  text-decoration: none;
+}
+
+.about-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: var(--white);
+  letter-spacing: 0.1em;
+  line-height: 2;
+}
+
+.about-cursor {
+  animation: kursor 0.7s step-end infinite;
+  color: white;
+}
+
+.countdown-display {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.2em;
+  line-height: 2.2;
+  text-align: center;
+}
+
+.about-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.45rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+
+.lightbox.open {
+  display: flex;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+}
+
+.loading-screen.fade {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner::before,
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+.loading-spinner::before {
+  inset: 0;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top: 2px solid var(--white);
+  animation: putar 1s linear infinite;
+}
+
+.loading-spinner::after {
+  inset: 10px;
+  border: 2px solid rgba(255,255,255,0.05);
+  border-bottom: 2px solid rgba(255,255,255,0.5);
+  animation: putar 0.6s linear infinite reverse;
+}
+
+@keyframes putar {
+  to { transform: rotate(360deg); }
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loading-percent {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.1em;
+  position: absolute;
+  z-index: 2;
+}
+
+.skill-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1rem 0 0 0;
+  margin-top: 2rem;
+}
+
+.skill-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.skill-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em;
+}
+
+.skill-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.skill-bar {
+  height: 100%;
+  background: var(--white);
+  width: 0%;
+  transition: width 1s ease;
+}
+
+.skill-bar.glow {
+  animation: skillGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes skillGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skill-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  color: var(--white);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.bday-card {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 42px;
+  background: var(--black);
+  border: 2px solid var(--white);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bday-card i {
+  font-size: 1.2rem;
+  color: var(--white);
+  transition: color 0.2s ease;
+}
+
+.bday-card.active {
+  background: var(--white);
+}
+
+.bday-card.active i {
+  color: var(--black);
+}
+
+#fireworkCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bday-gift-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.bday-gift-box {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: giftShake 0.3s ease-in-out 10;
+}
+
+.bday-gift-box i {
+  font-size: 4rem;
+  color: var(--white);
+}
+
+.bday-age {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.2em;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes giftShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.music-progress-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
+}
+
+.music-progress-wrapper.show {
+  opacity: 1;
+  max-height: 50px;
+}
+
+.music-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  position: relative;
+}
+
+.music-progress-bar {
+  height: 100%;
+  background: var(--white);
+  width: 0%;
+  transition: width 0.5s linear;
+  pointer-events: none;
+}
+
+.music-time-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.music-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em;
+}
+
+.digital-clock {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.15em;
+  text-align: center;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+  </style>
+  
+</head>
+<body>
+  
+  <div class="setting-overlay" id="bdayOverlay">
+  <div class="setting-panel">
+    <div class="setting-header">
+      <span>// BIRTHDAY</span>
+      <span class="setting-close" onclick="tutupBday()">✕</span>
+    </div>
+    <div class="setting-section" id="bdayCountdown" style="align-items: center; display: none;">
+      <div class="about-label" id="bdayLabelUmur">MENUJU 18 TAHUN</div>
+<div class="countdown-display" id="bdayCountdownDisplay"></div>
+<div class="about-label" id="bdayLabelTanggal">28 / 08 / 2026</div>
+    </div>
+    <div class="setting-section" id="bdayMessage" style="display: none;">
+  <canvas id="fireworkCanvas"></canvas>
+  <div class="bday-gift-wrapper" id="bdayGiftWrapper">
+    <div class="bday-gift-box" id="bdayGiftBox">
+      <i class="fa-solid fa-gift"></i>
+    </div>
+    <div class="bday-age" id="bdayAge" style="display:none;"></div>
+  </div>
+  <div class="about-text" id="bdayText"></div>
+</div>
+  </div>
+</div>
+  
+  <div class="loading-screen" id="loadingScreen">
+  <div class="loading-content">
+    <div class="loading-spinner">
+      <div class="loading-percent" id="loadingPercent">0%</div>
+    </div>
+  </div>
+</div>  
+  
+  <!-- SETTING OVERLAY -->
+<div class="setting-overlay" id="settingOverlay">
+  <div class="setting-panel">
+
+    <div class="setting-header">
+      <span>// SONG &nbsp; VIBE</span>
+      <span class="setting-close" onclick="tutupSettings()">✕</span>
+    </div>
+
+    <!-- Volume -->
+    <div class="setting-section">
+      <div class="setting-label">VOLUME</div>
+      <div class="setting-row">
+        <span class="setting-icon">🔈</span>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" oninput="ubahVolume(this.value)"/>
+        <span class="setting-icon">🔊</span>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div class="setting-section">
+      <div class="setting-label">MUSIC</div>
+      <div class="setting-row music-row">
+        <div class="music-arrow" onclick="prevMusic()">‹</div>
+        <div class="music-title" id="musicTitle">i love u</div>
+        <div class="music-arrow" onclick="nextMusic()">›</div>
+      </div>
+      <div class="music-progress-wrapper">
+        <div class="music-progress-track" onclick="seekMusic(event)">
+          <div class="music-progress-bar" id="musicProgressBar"></div>
+        </div>
+        <div class="music-time-row">
+          <span class="music-time" id="musicCurrentTime">0:00</span>
+          <span class="music-time" id="musicDuration">0:00</span>
+        </div>
+      </div>
+      <div class="setting-row" style="margin-top: 0.8rem;">
+        <div class="setting-btn" onclick="toggleMusic()">
+          <span id="musicLabel">▶ Play</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<audio id="bgMusic" loop></audio>
+
+<!-- ABOUT OVERLAY -->
+<div class="setting-overlay" id="aboutOverlay">
+  <div class="setting-panel">
+    <div class="setting-header">
+      <span>// PAST &nbsp; MESSAGES</span>
+      <span class="setting-close" onclick="tutupAbout()">✕</span>
+    </div>
+    <div class="setting-section" id="countdownSection" style="align-items: center;">
+      <div class="about-label">UNLOCKS IN</div>
+      <div class="countdown-display" id="countdownDisplay"></div>
+      <div class="about-label" id="countdownSub">01 / 01 / 2030</div>
+    </div>
+    <div class="setting-section" id="messageSection" style="display:none;">
+      <div class="about-text" id="aboutText"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="tutupFoto()">
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" onclick="event.stopPropagation()"/>
+</div>
+  
+  <!-- HAMBURGER -->
+<div class="hamburger" id="hamburger" onclick="toggleDrawer()">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<!-- OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+<div class="drawer-setting-card" onclick="bukaSettings()">
+  <i class="fa-solid fa-music"></i>
+  <span>Song Vibe</span>
+</div>
+
+<div class="drawer-setting-card" onclick="bukaAbout()">
+  <i class="fa-solid fa-envelope-open-text"></i>
+  <span>Past Messages</span>
+</div>
+
+
+<a class="drawer-setting-card" href="https://blackcat028.github.io/particle/" target="_blank">
+  <i class="fa-solid fa-circle-nodes"></i>
+  <span>Particle</span>
+</a>
+
+<div class="drawer-footer">
+  © made by human + ai &nbsp;•&nbsp; [ 3/03/2026 ]
+</div>
+</div>
+  
+   <div class="profile-header">
+  <div class="profile-avatar">
+    <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/bc.png" alt="foto" />
+  </div>
+  <div class="profile-info">
+    <div class="profile-name">Black Cat</div>
+    <div class="profile-tag">Time Capsule Future</div>
+  </div>
+</div>
+
+  <div class="content">
+    <div class="page active" id="page-0">
+      
+      <div class="home-section">
+  <div class="badge-box" id="age-badge"></div>
+  <div class="exp-track">
+  <div class="exp-bar" id="exp-bar"></div>
+</div>
+<div class="exp-percent" id="exp-percent">0%</div>
+</div>
+
+<div class="profile-divider"></div>
+
+    <div class="globe-wrapper">
+  <canvas id="globeCanvas"></canvas>
+  <div class="globe-text-wrapper">
+    <div class="breath-bars">
+  <div class="breath-bar-row">
+    <span class="breath-fill" id="bar1"></span>
+    <span class="breath-empty" id="bar1e"></span>
+    <span class="breath-val" id="val1"></span>
+  </div>
+  <div class="breath-bar-row">
+    <span class="breath-fill" id="bar2"></span>
+    <span class="breath-empty" id="bar2e"></span>
+    <span class="breath-val" id="val2"></span>
+  </div>
+  <div class="breath-bar-row">
+    <span class="breath-fill" id="bar3"></span>
+    <span class="breath-empty" id="bar3e"></span>
+    <span class="breath-val" id="val3"></span>
+  </div>
+  <div class="breath-bar-row">
+    <span class="breath-fill" id="bar4"></span>
+    <span class="breath-empty" id="bar4e"></span>
+    <span class="breath-val" id="val4"></span>
+  </div>
+</div>
+
+  <div class="alien-text" id="alienText"></div>
+  
+</div>
+
+<div class="digital-clock" id="digitalClock"></div>
+
+</div>
+    
+    </div> <!-- tutup page-0 -->
+
+    <div class="page" id="page-1">
+  <div class="lab-title-bar">[ ME & AI ]</div>
+  <div class="lab-carousel-wrapper">
+    <div class="lab-carousel">
+      
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat1.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat1.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat2.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat2.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat3.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat3.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat4.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat4.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat5.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat5.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat6.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat6.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat7.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat7.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat8.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat8.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat9.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat9.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat10.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat10.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat11.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat11.png" alt="foto 1" />
+</div>
+<div class="lab-card" data-src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat12.png">
+  <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/black_cat12.png" alt="foto 1" />
+</div>
+
+      
+    </div>
+    <div class="lab-controls">
+      <div class="lab-btn" onclick="prevCard()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </div>
+      <div class="lab-btn" onclick="nextCard()">
+        <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="page" id="page-2">
+  <div class="robot-wrapper">
+    <svg class="robot-svg" viewBox="0 0 100 210" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Antena kiri -->
+  <line x1="43" y1="4" x2="40" y2="14" stroke="white" stroke-width="1.2"/>
+  <circle cx="43" cy="3" r="2" fill="white"/>
+  <!-- Antena kanan -->
+  <line x1="57" y1="4" x2="60" y2="14" stroke="white" stroke-width="1.2"/>
+  <circle cx="57" cy="3" r="2" fill="white"/>
+
+  <!-- Kepala sleek -->
+  <path d="M32 14 Q32 10 36 10 L64 10 Q68 10 68 14 L70 44 Q60 48 50 48 Q40 48 30 44 Z"
+    fill="black" stroke="white" stroke-width="1.8"/>
+
+  <!-- Visor mata panjang -->
+  <rect x="34" y="20" width="32" height="10" rx="5" fill="white" opacity="0.15"/>
+  <rect x="34" y="20" width="32" height="10" rx="5" fill="none" stroke="white" stroke-width="1.2"/>
+  <!-- Pupil kiri -->
+  <g class="mata-kiri">
+  <rect x="37" y="22" width="10" height="6" rx="3" fill="white" opacity="0.9"/>
+  <circle cx="42" cy="25" r="2" fill="black"/>
+  <circle cx="43" cy="24" r="0.8" fill="white"/>
+  </g>
+  <!-- Pupil kanan -->
+  <g class="mata-kanan">
+  <rect x="53" y="22" width="10" height="6" rx="3" fill="white" opacity="0.9"/>
+  <circle cx="58" cy="25" r="2" fill="black"/>
+  <circle cx="59" cy="24" r="0.8" fill="white"/>
+  </g>
+
+  <!-- Garis detail kepala -->
+  <line x1="34" y1="34" x2="66" y2="34" stroke="white" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Mulut tipis -->
+  <g class="mulut">
+  <rect x="40" y="38" width="20" height="5" rx="1.5" fill="white" opacity="0.5"/>
+  </g>
+
+  <!-- Leher -->
+  <rect x="45" y="48" width="10" height="9" rx="2" fill="black" stroke="white" stroke-width="1.5"/>
+  <line x1="47" y1="50" x2="47" y2="55" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="50" y1="50" x2="50" y2="55" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="53" y1="50" x2="53" y2="55" stroke="white" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Bahu kiri trapezoid -->
+  <path d="M22 60 L30 57 L30 72 L22 75 Z" fill="black" stroke="white" stroke-width="1.5"/>
+  <!-- Bahu kanan trapezoid -->
+  <path d="M78 60 L70 57 L70 72 L78 75 Z" fill="black" stroke="white" stroke-width="1.5"/>
+
+  <!-- Badan utama -->
+  <path d="M30 57 L70 57 L72 104 L28 104 Z" fill="black" stroke="white" stroke-width="1.8"/>
+
+  <!-- Panel dada -->
+  <rect x="36" y="64" width="28" height="20" rx="2" fill="black" stroke="white" stroke-width="1"/>
+  <!-- Core reaktor -->
+  <rect x="42" y="68" width="16" height="12" rx="2" fill="black" stroke="white" stroke-width="0.8"/>
+  <circle cx="50" cy="74" r="4" fill="white" opacity="0.9"/>
+  <circle cx="50" cy="74" r="2.5" fill="black"/>
+  <circle cx="50" cy="74" r="1" fill="white"/>
+
+  <!-- Garis panel bawah -->
+  <line x1="36" y1="90" x2="64" y2="90" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <line x1="36" y1="95" x2="64" y2="95" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <line x1="36" y1="100" x2="64" y2="100" stroke="white" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Lengan kiri -->
+  <g class="tangan-kiri">
+  <path d="M22 75 L14 78 L12 112 L20 114 L26 110 L28 76 Z"
+    fill="black" stroke="white" stroke-width="1.5"/>
+  <!-- Detail lengan kiri -->
+  <line x1="14" y1="88" x2="26" y2="86" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <line x1="14" y1="96" x2="26" y2="94" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <!-- Tangan kiri -->
+  <path d="M12 112 Q10 118 14 120 L22 120 Q26 118 26 112 Z"
+    fill="black" stroke="white" stroke-width="1.5"/>
+  <line x1="14" y1="114" x2="14" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="18" y1="113" x2="18" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="22" y1="114" x2="22" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  </g>
+
+  <!-- Lengan kanan -->
+  <g class="tangan-kanan">
+  <path d="M78 75 L86 78 L88 112 L80 114 L74 110 L72 76 Z"
+    fill="black" stroke="white" stroke-width="1.5"/>
+  <!-- Detail lengan kanan -->
+  <line x1="86" y1="88" x2="74" y2="86" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <line x1="86" y1="96" x2="74" y2="94" stroke="white" stroke-width="0.8" opacity="0.4"/>
+  <!-- Tangan kanan -->
+  <path d="M88 112 Q90 118 86 120 L78 120 Q74 118 74 112 Z"
+    fill="black" stroke="white" stroke-width="1.5"/>
+  <line x1="78" y1="114" x2="78" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="82" y1="113" x2="82" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  <line x1="86" y1="114" x2="86" y2="119" stroke="white" stroke-width="0.8" opacity="0.5"/>
+  </g>
+
+  <!-- Pinggang -->
+  <path d="M28 104 L72 104 L70 114 L30 114 Z" fill="black" stroke="white" stroke-width="1.5"/>
+  <line x1="30" y1="109" x2="70" y2="109" stroke="white" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Kaki kiri -->
+  <path d="M30 114 L44 114 L46 168 L28 168 Z" fill="black" stroke="white" stroke-width="1.8"/>
+  <!-- Detail kaki kiri -->
+  <line x1="30" y1="130" x2="44" y2="130" stroke="white" stroke-width="0.8" opacity="0.3"/>
+  <line x1="30" y1="148" x2="45" y2="148" stroke="white" stroke-width="0.8" opacity="0.3"/>
+  <!-- Sepatu kiri -->
+  <path d="M26 168 Q24 172 24 176 L46 176 Q48 172 46 168 Z" fill="white"/>
+  <path d="M24 174 Q24 178 28 178 L46 178 Q48 176 46 176 L24 176 Z" fill="white" opacity="0.5"/>
+
+  <!-- Kaki kanan -->
+  <path d="M56 114 L70 114 L72 168 L54 168 Z" fill="black" stroke="white" stroke-width="1.8"/>
+  <!-- Detail kaki kanan -->
+  <line x1="56" y1="130" x2="70" y2="130" stroke="white" stroke-width="0.8" opacity="0.3"/>
+  <line x1="55" y1="148" x2="70" y2="148" stroke="white" stroke-width="0.8" opacity="0.3"/>
+  <!-- Sepatu kanan -->
+  <path d="M54 168 Q52 172 54 176 L76 176 Q76 172 72 168 Z" fill="white"/>
+  <path d="M54 176 Q54 178 56 178 L76 178 Q76 176 72 176 L54 176 Z" fill="white" opacity="0.5"/>
+
+</svg>
+
+    <div class="speech-bubble" id="speechBubble"><span id="typingText"></span><span class="typing-cursor" id="typingCursor"></span></div>
+    <div class="robot-name">// N E U R O \\</div>
+    <div class="robot-desc">Time Capsule Guardian</div>
+  </div>
+</div>
+
+    <div class="page" id="page-3" style="margin-top: -4.5rem;">
+  <div class="bday-card" onclick="bukaBday()">
+    <i class="fa-solid fa-gift"></i>
+  </div>
+  <div class="profile-page-content">
+    <div class="profile-photo-box">
+      <img src="https://raw.githubusercontent.com/blackcat028/time-capsule/main/image/bc.png" alt="foto profil" />
+    </div>
+    <div class="profile-info-box">
+      <div class="profile-info-item">NAME: BLACK CAT</div>
+<div class="profile-info-item">AGE: <span id="profile-age">--</span></div>
+<div class="profile-info-item">HOBBY: IMAGINATION</div>
+    </div>
+  </div>
+  
+  <div class="profile-cards">
+  <div class="profile-card" onclick="bukaUrl(this, '#')"><i class="fa-brands fa-tiktok"></i></div>
+<div class="profile-card" onclick="bukaUrl(this, '#')"><i class="fa-brands fa-instagram"></i></div>
+<div class="profile-card" onclick="bukaUrl(this, '#')"><i class="fa-brands fa-whatsapp"></i></div>
+</div>
+
+<div class="profile-divider"></div>
+
+<div class="skill-wrapper">
+  <div class="skill-title">[ STATS ]</div>
+  <div class="skill-item">
+    <div class="skill-header">
+      <span class="skill-name">Vibe Coding</span>
+      <span class="skill-val">90%</span>
+    </div>
+    <div class="skill-track">
+      <div class="skill-bar" data-width="90"></div>
+    </div>
+  </div>
+  <div class="skill-item">
+    <div class="skill-header">
+      <span class="skill-name">UI Design</span>
+      <span class="skill-val">75%</span>
+    </div>
+    <div class="skill-track">
+      <div class="skill-bar" data-width="75"></div>
+    </div>
+  </div>
+  <div class="skill-item">
+    <div class="skill-header">
+      <span class="skill-name">Prompt Engineer</span>
+      <span class="skill-val">85%</span>
+    </div>
+    <div class="skill-track">
+      <div class="skill-bar" data-width="85"></div>
+    </div>
+  </div>
+  <div class="skill-item">
+    <div class="skill-header">
+      <span class="skill-name">Creative Thinking</span>
+      <span class="skill-val">95%</span>
+    </div>
+    <div class="skill-track">
+      <div class="skill-bar" data-width="95"></div>
+    </div>
+  </div>
+</div>
+  
+</div>
+
+
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab(0, this)">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+      <span class="nav-label">Home</span>
+    </div>
+
+    <div class="nav-item" onclick="switchTab(1, this)">
+  <div class="nav-icon">
+    <i class="fa-solid fa-images"></i>
+  </div>
+  <span class="nav-label">Memory</span>
+</div>
+
+    <div class="nav-item" onclick="switchTab(2, this)">
+  <div class="nav-icon">
+    <i class="fa-solid fa-robot"></i>
+  </div>
+  <span class="nav-label">Bot</span>
+</div>
+
+    <div class="nav-item" onclick="switchTab(3, this)">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/></svg>
+      </div>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+
+  <script>
+    function switchTab(index, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('page-' + index).classList.add('active');
+  
+  // Tampil/sembunyiin profile header & hamburger
+  const header = document.querySelector('.profile-header');
+  const burger = document.getElementById('hamburger');
+  if (index === 0) {
+    header.classList.remove('hidden');
+    burger.classList.remove('hidden');
+  } else {
+    header.classList.add('hidden');
+    burger.classList.add('hidden');
+    closeDrawer();
+  }
+
+  if (index === 3 && !skillsAnimated) {
+    setTimeout(() => animateSkills(), 300);
+    skillsAnimated = true;
+  }
+
+  if (index === 2) {
+    setTimeout(() => {
+      ketik('typingText');
+    }, 400);
+  } else {
+    stopKetik();
+  }
+}
+
+function toggleDrawer() {
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const burger = document.getElementById('hamburger');
+
+  drawer.classList.toggle('open');
+  overlay.classList.toggle('open');
+  burger.classList.toggle('open');
+}
+
+function closeDrawer() {
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const burger = document.getElementById('hamburger');
+
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  burger.classList.remove('open');
+}
+
+function hitungUmur() {
+  // Tanggal lahir Ryuuken-sama → ganti sesuai aslinya
+  const lahir = new Date(2008, 7, 28); // Juli = bulan ke-6 (0-index), tanggal 1
+  const sekarang = new Date();
+
+  let umur = sekarang.getFullYear() - lahir.getFullYear();
+
+  const belumUltah =
+    sekarang.getMonth() < lahir.getMonth() ||
+    (sekarang.getMonth() === lahir.getMonth() &&
+      sekarang.getDate() < lahir.getDate());
+
+  if (belumUltah) umur--;
+
+  document.getElementById('age-badge').textContent = umur;
+  
+  const profileAge = document.getElementById('profile-age');
+if (profileAge) profileAge.textContent = umur;
+
+// Hitung EXP — progress dari ultah terakhir ke ultah berikutnya
+const ultahTerakhir = new Date(sekarang.getFullYear(), lahir.getMonth(), lahir.getDate());
+if (ultahTerakhir > sekarang) ultahTerakhir.setFullYear(sekarang.getFullYear() - 1);
+const ultahBerikut = new Date(ultahTerakhir.getFullYear() + 1, lahir.getMonth(), lahir.getDate());
+
+const totalHari = (ultahBerikut - ultahTerakhir) / (1000 * 60 * 60 * 24);
+const hariLewat = (sekarang - ultahTerakhir) / (1000 * 60 * 60 * 24);
+const persen = Math.min((hariLewat / totalHari) * 100, 100).toFixed(1);
+
+setTimeout(() => {
+  document.getElementById('exp-bar').style.width = persen + '%';
+  document.getElementById('exp-percent').textContent = persen + '%';
+}, 300);
+}
+
+// hitungUmur();
+
+function bukaUrl(el, url) {
+  document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  setTimeout(() => {
+    window.open(url, '_blank');
+  }, 200);
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.profile-card')) {
+    document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('active'));
+  }
+  if (!e.target.closest('.lab-btn')) {
+    document.querySelectorAll('.lab-btn').forEach(b => b.classList.remove('active'));
+  }
+  if (!e.target.closest('.bday-card') && !e.target.closest('#bdayOverlay')) {
+    document.querySelector('.bday-card').classList.remove('active');
+  }
+});
+
+let currentCard = 0;
+
+function updateCarousel() {
+  const cards = document.querySelectorAll('.lab-card');
+  const total = cards.length;
+
+  cards.forEach((card, i) => {
+    card.classList.remove('center', 'left', 'right', 'hidden');
+    if (i === currentCard) {
+      card.classList.add('center');
+    } else if (i === (currentCard - 1 + total) % total) {
+      card.classList.add('left');
+    } else if (i === (currentCard + 1) % total) {
+      card.classList.add('right');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+function prevCard() {
+  const total = document.querySelectorAll('.lab-card').length;
+  currentCard = (currentCard - 1 + total) % total;
+  updateCarousel();
+  activateBtn('prev');
+}
+
+function nextCard() {
+  const total = document.querySelectorAll('.lab-card').length;
+  currentCard = (currentCard + 1) % total;
+  updateCarousel();
+  activateBtn('next');
+}
+
+function activateBtn(type) {
+  const btns = document.querySelectorAll('.lab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (type === 'prev') btns[0].classList.add('active');
+  if (type === 'next') btns[1].classList.add('active');
+}
+
+updateCarousel();
+
+function getSapaan() {
+  const jam = new Date().getHours();
+  if (jam >= 5 && jam < 12) return 'GOOD MORNING';
+  if (jam >= 12 && jam < 15) return 'GOOD AFTERNOON';
+  if (jam >= 15 && jam < 18) return 'GOOD AFTERNOON';
+  return 'GOOD EVENING';
+}
+
+function getTanggal() {
+  const now = new Date();
+  const d = String(now.getDate()).padStart(2, '0');
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const y = now.getFullYear();
+  return `TODAY [${d}/${m}/${y}]`;
+}
+
+const pesanRobot = [
+  'HELLO, SIR',
+  getSapaan(),
+  getTanggal(),
+  'HAVE A GREAT DAY!',
+];
+
+let robotTyping = null;
+
+function ketik(elId) {
+  const el = document.getElementById(elId);
+  const bubble = document.getElementById('speechBubble');
+  const cursor = document.getElementById('typingCursor');
+
+  bubble.classList.add('show');
+  cursor.style.display = 'inline-block';
+  el.textContent = '';
+
+  let pesanIndex = 0;
+
+  function tulisKalimat() {
+    const teks = pesanRobot[pesanIndex];
+    let i = 0;
+
+    // ngetik
+    document.querySelector('.mulut').classList.add('bicara');
+    robotTyping = setInterval(() => {
+      el.textContent += teks[i];
+      i++;
+      if (i >= teks.length) {
+        clearInterval(robotTyping);
+        document.querySelector('.mulut').classList.remove('bicara');
+
+        // jeda
+        robotTyping = setTimeout(() => {
+
+          // hapus
+          robotTyping = setInterval(() => {
+            el.textContent = el.textContent.slice(0, -1);
+            if (el.textContent.length === 0) {
+              clearInterval(robotTyping);
+
+              // cek apakah sudah kalimat terakhir
+              pesanIndex++;
+              if (pesanIndex < pesanRobot.length) {
+                setTimeout(tulisKalimat, 400);
+              } else {
+                // semua pesan selesai → fade out bubble
+                setTimeout(() => {
+                  bubble.style.transition = 'opacity 0.8s ease';
+                  bubble.style.opacity = '0';
+                  setTimeout(() => {
+                    bubble.classList.remove('show');
+                  bubble.style.opacity = '';
+                  el.textContent = '';
+                  cursor.style.display = 'none';
+                  document.querySelector('.mulut').classList.remove('bicara');
+                  }, 800);
+                }, 400);
+              }
+            }
+          }, 40);
+
+        }, 1800);
+      }
+    }, 70);
+  }
+
+  tulisKalimat();
+}
+
+function stopKetik() {
+  if (robotTyping) {
+    clearInterval(robotTyping);
+    clearTimeout(robotTyping);
+    robotTyping = null;
+  }
+  const bubble = document.getElementById('speechBubble');
+  const el = document.getElementById('typingText');
+  if (bubble) bubble.classList.remove('show');
+  if (el) el.textContent = '';
+  const mulut = document.querySelector('.mulut');
+  if (mulut) mulut.classList.remove('bicara');
+}
+
+(function() {
+  const canvas = document.getElementById('globeCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 280, H = 280;
+  canvas.width = W;
+  canvas.height = H;
+
+  const R = 110;
+  const totalPoints = 600;
+  let rotX = 0.3, rotY = 0;
+  let targetRotX = 0.3;
+  let dragging = false;
+  let lastX, lastY;
+  let autoRotY = 0.008;
+
+  // Generate titik di permukaan bola
+  const points = [];
+  for (let i = 0; i < totalPoints; i++) {
+    const theta = Math.acos(1 - 2 * (i + 0.5) / totalPoints);
+    const phi = Math.PI * (1 + Math.sqrt(5)) * i;
+    points.push({
+      x: Math.sin(theta) * Math.cos(phi),
+      y: Math.sin(theta) * Math.sin(phi),
+      z: Math.cos(theta)
+    });
+  }
+
+  function rotateX(p, a) {
+    return {
+      x: p.x,
+      y: p.y * Math.cos(a) - p.z * Math.sin(a),
+      z: p.y * Math.sin(a) + p.z * Math.cos(a)
+    };
+  }
+
+  function rotateY(p, a) {
+    return {
+      x: p.x * Math.cos(a) + p.z * Math.sin(a),
+      y: p.y,
+      z: -p.x * Math.sin(a) + p.z * Math.cos(a)
+    };
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    if (!dragging) {
+      rotY += autoRotY;
+      rotX += (targetRotX - rotX) * 0.008;
+    }
+
+    const projected = points.map(p => {
+      let r = rotateY(p, rotY);
+      r = rotateX(r, rotX);
+      const scale = (r.z + 2) / 3;
+      return {
+        sx: W / 2 + r.x * R,
+        sy: H / 2 + r.y * R,
+        scale,
+        z: r.z
+      };
+    });
+
+    projected.sort((a, b) => a.z - b.z);
+
+    projected.forEach(p => {
+      const size = 2.5 * p.scale;
+      const alpha = 0.3 + 0.7 * p.scale;
+      ctx.beginPath();
+      ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  // Mouse drag
+  canvas.addEventListener('mousedown', e => {
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    rotY += (e.clientX - lastX) * 0.01;
+    rotX += (e.clientY - lastY) * 0.01;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+  window.addEventListener('mouseup', () => dragging = false);
+
+  // Touch drag
+  canvas.addEventListener('touchstart', e => {
+    dragging = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  });
+  canvas.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    rotY += (e.touches[0].clientX - lastX) * 0.01;
+    rotX += (e.touches[0].clientY - lastY) * 0.01;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  });
+  canvas.addEventListener('touchend', () => dragging = false);
+
+  draw();
+})();
+
+(function() {
+  const MAX = 8;
+
+  const bars = [
+    { fill: document.getElementById('bar1'), empty: document.getElementById('bar1e'), val: document.getElementById('val1'), cur: 3, dir: 1, speed: 100 },
+    { fill: document.getElementById('bar2'), empty: document.getElementById('bar2e'), val: document.getElementById('val2'), cur: 6, dir: -1, speed: 280 },
+    { fill: document.getElementById('bar3'), empty: document.getElementById('bar3e'), val: document.getElementById('val3'), cur: 4, dir: 1, speed: 220 },
+    { fill: document.getElementById('bar4'), empty: document.getElementById('bar4e'), val: document.getElementById('val4'), cur: 7, dir: -1, speed: 140 },
+  ];
+
+  bars.forEach(bar => {
+    function animate() {
+      bar.cur += bar.dir;
+      if (bar.cur >= MAX) bar.dir = -1;
+      if (bar.cur <= 1) bar.dir = 1;
+
+      const pct = Math.round((bar.cur / MAX) * 100);
+      bar.fill.textContent = '█'.repeat(bar.cur);
+      bar.empty.textContent = '░'.repeat(MAX - bar.cur);
+      bar.val.textContent = pct + '%';
+
+      // speed sedikit random biar gk monoton
+      const jitter = Math.floor(Math.random() * 150);
+      setTimeout(animate, bar.speed + jitter);
+    }
+    animate();
+  });
+})();
+
+(function() {
+  const allLines = [
+    [
+      '> ORBIT: 149.6M KM',
+      '> LIFE.FORM: CONFIRMED',
+      '> INTEL: ANALYZING...',
+      '> BEHAVIOR: ILLOGICAL',
+      '> TECH: DEVELOPING',
+      '> SIGNAL: LOCKED ██',
+      '> SUBJECT: [REDACTED]',
+      '> STATUS: MONITORING',
+    ],
+    [
+      '> SECTOR: MILKY WAY',
+      '> PLANET: SOL-3',
+      '> ATMOS: BREATHABLE',
+      '> TEMP: 14.9C AVG',
+      '> WATER: 71% SURFACE',
+      '> DOMINANT: MAMMALS',
+      '> CONFLICT: ONGOING',
+      '> THREAT: NEGLIGIBLE',
+    ],
+    [
+      '> NODE: TC-00X FOUND',
+      '> ENCRYPT: CRACKING..',
+      '> ACCESS: GRANTED ██',
+      '> DATA: EXTRACTING..',
+      '> MEMORY: ARCHIVED',
+      '> TIMELINE: LOCKED',
+      '> CAPSULE: ACTIVE',
+      '> UPLINK: STABLE ███',
+    ],
+    [
+      '> SCAN: COMPLETE',
+      '> BIO.SIGN: DETECTED',
+      '> AGE: JUVENILE',
+      '> SKILL: VIBE.CODE',
+      '> CURIOSITY: MAX ███',
+      '> POTENTIAL: HIGH',
+      '> WATCHING: ALWAYS',
+      '> //:REPORT.END',
+    ],
+  ];
+
+  const el = document.getElementById('alienText');
+  let setIdx = 0;
+  let lineIdx = 0;
+  let charIdx = 0;
+  let display = [];
+
+  function type() {
+    const lines = allLines[setIdx];
+
+    if (lineIdx >= lines.length) {
+      setTimeout(() => {
+        display = [];
+        lineIdx = 0;
+        charIdx = 0;
+        setIdx = (setIdx + 1) % allLines.length;
+        type();
+      }, 3000);
+      return;
+    }
+
+    const line = lines[lineIdx];
+
+    if (charIdx < line.length) {
+      if (charIdx === 0) display.push('');
+      display[display.length - 1] += line[charIdx];
+      el.innerHTML = display.join('\n') + '<span class="alien-cursor">|</span>';
+      charIdx++;
+      setTimeout(type, Math.random() * 30 + 25);
+    } else {
+      lineIdx++;
+      charIdx = 0;
+      setTimeout(type, 250);
+    }
+  }
+
+  setTimeout(type, 600);
+})();
+
+// Setting panel
+function bukaSettings() {
+  document.getElementById('settingOverlay').classList.add('open');
+  closeDrawer();
+}
+
+function tutupSettings() {
+  document.getElementById('settingOverlay').classList.remove('open');
+}
+
+// Volume
+function ubahVolume(val) {
+  const audio = document.getElementById('bgMusic');
+  audio.volume = val;
+}
+
+// Music
+const musicList = [
+  { title: 'i love u', src: 'https://raw.githubusercontent.com/blackcat028/time-capsule/main/audio/i_love_u.mp3' },
+  { title: 'interlinked', src: 'https://raw.githubusercontent.com/blackcat028/time-capsule/main/audio/interlinked.mp3' },
+  { title: 'oblique', src: 'https://raw.githubusercontent.com/blackcat028/time-capsule/main/audio/oblique.mp3' },
+  { title: 'memory rebort', src: 'https://raw.githubusercontent.com/blackcat028/time-capsule/main/audio/memory_rebort.mp3' },
+  { title: 'solitude', src: 'https://raw.githubusercontent.com/blackcat028/time-capsule/main/audio/solitude.mp3' },
+];
+let musicIdx = 0;
+let musicPlaying = false;
+
+let fadeInterval = null;
+
+function fadeIn(audio) {
+  clearInterval(fadeInterval);
+  audio.volume = 0;
+  fadeInterval = setInterval(() => {
+    if (audio.volume < 0.95) {
+      audio.volume = Math.min(audio.volume + 0.05, 1);
+    } else {
+      audio.volume = 1;
+      clearInterval(fadeInterval);
+    }
+  }, 30);
+}
+
+function fadeOut(audio, callback) {
+  clearInterval(fadeInterval);
+  fadeInterval = setInterval(() => {
+    if (audio.volume > 0.05) {
+      audio.volume = Math.max(audio.volume - 0.05, 0);
+    } else {
+      audio.volume = 0;
+      audio.pause();
+      audio.currentTime = 0;
+      clearInterval(fadeInterval);
+      if (callback) callback();
+    }
+  }, 30);
+}
+
+function updateMusic() {
+  const audio = document.getElementById('bgMusic');
+  document.getElementById('musicTitle').textContent = musicList[musicIdx].title;
+  if (musicPlaying) {
+    fadeOut(audio, () => {
+      audio.src = musicList[musicIdx].src;
+      audio.play();
+      fadeIn(audio);
+    });
+  }
+}
+
+function prevMusic() {
+  musicIdx = (musicIdx - 1 + musicList.length) % musicList.length;
+  updateMusic();
+}
+
+function nextMusic() {
+  musicIdx = (musicIdx + 1) % musicList.length;
+  updateMusic();
+}
+
+function toggleMusic() {
+  const audio = document.getElementById('bgMusic');
+  const progress = document.querySelector('.music-progress-wrapper');
+  if (!musicPlaying) {
+    audio.src = musicList[musicIdx].src;
+    audio.play();
+    fadeIn(audio);
+    musicPlaying = true;
+    document.getElementById('musicLabel').textContent = '■ Stop';
+    progress.classList.add('show');
+  } else {
+    fadeOut(audio, () => {
+      musicPlaying = false;
+      document.getElementById('musicLabel').textContent = '▶ Play';
+    });
+    progress.classList.remove('show');
+  }
+}
+
+let countdownTimer = null;
+
+function bukaAbout() {
+  document.getElementById('aboutOverlay').classList.add('open');
+  closeDrawer();
+
+  const target = new Date('2030-01-01T00:00:00');
+  const sekarang = new Date();
+
+  if (sekarang >= target) {
+    // Sudah waktunya — tampilkan pesan
+    document.getElementById('countdownSection').style.display = 'none';
+    document.getElementById('messageSection').style.display = 'block';
+    typeAbout();
+  } else {
+    // Belum waktunya — tampilkan countdown
+    document.getElementById('countdownSection').style.display = 'block';
+    document.getElementById('messageSection').style.display = 'none';
+    jalankanCountdown(target);
+  }
+}
+
+function jalankanCountdown(target) {
+  function update() {
+    const now = new Date();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      clearInterval(countdownTimer);
+      document.getElementById('countdownSection').style.display = 'none';
+      document.getElementById('messageSection').style.display = 'block';
+      typeAbout();
+      return;
+    }
+
+    const hari = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const jam = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const menit = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const detik = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById('countdownDisplay').innerHTML =
+      hari + ' HARI<br>' +
+      String(jam).padStart(2,'0') + ' JAM<br>' +
+      String(menit).padStart(2,'0') + ' MENIT<br>' +
+      String(detik).padStart(2,'0') + ' DETIK';
+  }
+
+  update();
+  countdownTimer = setInterval(update, 1000);
+}
+
+function typeAbout() {
+  const el = document.getElementById('aboutText');
+  el.innerHTML = '';
+  const teks = 'Hey, you.\n\nThis is me—the version of you living in 2026. I’m not writing this for anyone in particular, but for you, who’s reading this in the future.\n\nRight now, I’m learning a lot of things: artificial intelligence, prompt engineering, and how to build something unique. Sometimes I’m tired, sometimes I’m motivated, but I keep going.\n\nThis project—Time Capsule—is proof that you were once here. You once struggled, you once created, and you once cared about your own future.\n\nI hope you’ve become a better version of yourself—calmer, wiser, and still curious about the world.\n\nTake good care of yourself, okay?\n\n— Ryuuken, 3/03/2026';
+  let i = 0;
+  function type() {
+    if (i < teks.length) {
+      el.innerHTML = teks.slice(0, i + 1).replace(/\n/g, '<br>') + '<span class="about-cursor">|</span>';
+      i++;
+      setTimeout(type, 40);
+    } else {
+      el.innerHTML = teks.replace(/\n/g, '<br>');
+    }
+  }
+  type();
+}
+
+function tutupAbout() {
+  document.getElementById('aboutOverlay').classList.remove('open');
+  document.getElementById('aboutText').innerHTML = '';
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+}
+
+function bukaFoto(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+document.querySelector('.lab-carousel').addEventListener('click', function(e) {
+  const card = e.target.closest('.lab-card');
+  if (!card) return;
+  if (!card.classList.contains('center')) return;
+  bukaFoto(card.dataset.src);
+});
+
+function tutupFoto() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightboxImg').src = '';
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const screen = document.getElementById('loadingScreen');
+    screen.classList.add('fade');
+    setTimeout(() => {
+      screen.style.display = 'none';
+      hitungUmur();
+    }, 600);
+  }, 4500);
+});
+
+(function() {
+  const el = document.getElementById('loadingPercent');
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct++;
+    el.textContent = pct + '%';
+    if (pct >= 100) clearInterval(interval);
+  }, 25);
+})();
+
+let skillsAnimated = false;
+
+function animateSkills() {
+  const bars = document.querySelectorAll('.skill-bar');
+
+  // jalankan berurutan
+  bars.forEach((bar, idx) => {
+    setTimeout(() => {
+      const target = parseInt(bar.dataset.width);
+      const valEl = bar.closest('.skill-item').querySelector('.skill-val');
+      bar.style.width = target + '%';
+
+      let current = 0;
+      const step = target / 60;
+      const counter = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(counter);
+          setTimeout(() => bar.classList.add('glow'), 100);
+        }
+        valEl.textContent = Math.floor(current) + '%';
+      }, 16);
+    }, idx * 400);
+  });
+}
+
+let bdayTimer = null;
+
+function bukaBday() {
+  document.querySelector('.bday-card').classList.add('active');
+  setTimeout(() => {
+    document.getElementById('bdayOverlay').classList.add('open');
+
+    // cek apakah waktunya ultah
+    const sekarang = new Date();
+    const ultahTahunIni = new Date(sekarang.getFullYear(), 7, 28, 6, 0, 0);
+    const selisihHari = (sekarang - ultahTahunIni) / (1000 * 60 * 60 * 24);
+    if (selisihHari >= 0 && selisihHari < 3) {
+      setTimeout(() => startFirework(), 300);
+    }
+  }, 800);
+
+  const sekarang = new Date();
+  const ultahTahunIni = new Date(sekarang.getFullYear(), 7, 28, 6, 0, 0);
+
+  // hitung umur yang akan dicapai
+  const lahir = new Date(2008, 7, 28);
+  let umurBerikut = sekarang.getFullYear() - lahir.getFullYear();
+  if (sekarang < ultahTahunIni) {
+    // belum ultah tahun ini
+  } else {
+    umurBerikut++;
+  }
+
+  const tglLabel = '28 / 08 / ' + ultahTahunIni.getFullYear();
+  document.getElementById('bdayLabelUmur').textContent = 'MENUJU ' + umurBerikut + ' TAHUN';
+  document.getElementById('bdayLabelTanggal').textContent = tglLabel;
+  const selisihHari = (sekarang - ultahTahunIni) / (1000 * 60 * 60 * 24);
+
+  let target;
+  if (selisihHari >= 0 && selisihHari < 3) {
+    // Masih dalam 3 hari ultah — tampilkan pesan
+    document.getElementById('bdayCountdown').style.display = 'none';
+    document.getElementById('bdayMessage').style.display = 'block';
+    typeBday();
+    return;
+  } else if (selisihHari >= 3) {
+    // Sudah lewat 3 hari — countdown ke ultah tahun depan
+    target = new Date(sekarang.getFullYear() + 1, 7, 28);
+  } else {
+    // Belum ultah — countdown ke ultah tahun ini
+    target = ultahTahunIni;
+  }
+
+  if (sekarang >= target) {
+    document.getElementById('bdayCountdown').style.display = 'none';
+    document.getElementById('bdayMessage').style.display = 'block';
+    typeBday();
+  } else {
+    document.getElementById('bdayCountdown').style.display = 'block';
+    document.getElementById('bdayMessage').style.display = 'none';
+    jalankanBdayTimer(target);
+  }
+}
+
+function jalankanBdayTimer(target) {
+  function update() {
+    const now = new Date();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      clearInterval(bdayTimer);
+      document.getElementById('bdayCountdown').style.display = 'none';
+      document.getElementById('bdayMessage').style.display = 'block';
+      typeBday();
+      return;
+    }
+
+    const hari = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const jam = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const menit = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const detik = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById('bdayCountdownDisplay').innerHTML =
+      hari + ' HARI<br>' +
+      String(jam).padStart(2,'0') + ' JAM<br>' +
+      String(menit).padStart(2,'0') + ' MENIT<br>' +
+      String(detik).padStart(2,'0') + ' DETIK';
+  }
+
+  update();
+  bdayTimer = setInterval(update, 1000);
+}
+
+function typeBday() {
+  // hitung umur sekarang
+  const sekarang = new Date();
+  const lahir = new Date(2008, 7, 28);
+  let umur = sekarang.getFullYear() - lahir.getFullYear();
+  if (sekarang.getMonth() < lahir.getMonth() ||
+    (sekarang.getMonth() === lahir.getMonth() && sekarang.getDate() < lahir.getDate())) {
+    umur--;
+  }
+
+  // mulai kembang api
+  startFirework();
+
+  // kado goyang dulu, lalu terbuka
+  setTimeout(() => {
+    const giftBox = document.getElementById('bdayGiftBox');
+    giftBox.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    giftBox.style.transform = 'scale(1.3)';
+    giftBox.style.opacity = '0';
+
+    setTimeout(() => {
+      giftBox.style.display = 'none';
+      const ageEl = document.getElementById('bdayAge');
+      ageEl.textContent = umur;
+      ageEl.style.display = 'block';
+
+      // teks ngetik otomatis setelah umur muncul
+      setTimeout(() => {
+        const el = document.getElementById('bdayText');
+        el.innerHTML = '';
+        const teks = 'Hey darling, happy birthday~ 🎂\n\nYou\'re ' + umur + ' years old now, can you believe it? You\'ve grown into someone truly amazing, and I\'m so proud of you.\n\nI hope this year brings you nothing but happiness and beautiful moments. Take care of yourself, stay happy, and don\'t forget to treat yourself once in a while.\n\nYou\'ve been working so hard, and you deserve all the good things in this world.\n\nHappy birthday, I hope all your dreams come true darling~ 🎉';
+        let i = 0;
+        function type() {
+          if (i < teks.length) {
+            el.innerHTML = teks.slice(0, i + 1).replace(/\n/g, '<br>') + '<span class="about-cursor">|</span>';
+            i++;
+            setTimeout(type, 40);
+          } else {
+            el.innerHTML = teks.replace(/\n/g, '<br>');
+          }
+        }
+        type();
+      }, 800);
+    }, 400);
+  }, 1500);
+}
+
+function startFirework() {
+  const canvas = document.getElementById('fireworkCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  const particles = [];
+
+  function createBurst(x, y) {
+    for (let i = 0; i < 40; i++) {
+      const angle = (Math.PI * 2 / 40) * i;
+      const speed = Math.random() * 3 + 1;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1,
+        size: Math.random() * 2 + 1
+      });
+    }
+  }
+
+  // Buat beberapa burst
+  setTimeout(() => createBurst(canvas.width * 0.3, canvas.height * 0.3), 0);
+  setTimeout(() => createBurst(canvas.width * 0.7, canvas.height * 0.2), 400);
+  setTimeout(() => createBurst(canvas.width * 0.5, canvas.height * 0.4), 800);
+  setTimeout(() => createBurst(canvas.width * 0.2, canvas.height * 0.5), 1200);
+  setTimeout(() => createBurst(canvas.width * 0.8, canvas.height * 0.4), 1600);
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.alpha -= 0.015;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+      ctx.fill();
+    });
+    // hapus partikel yang sudah hilang
+    for (let i = particles.length - 1; i >= 0; i--) {
+      if (particles[i].alpha <= 0) particles.splice(i, 1);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function tutupBday() {
+  document.querySelector('.bday-card').classList.remove('active');
+  document.getElementById('bdayOverlay').classList.remove('open');
+  document.getElementById('bdayText').innerHTML = '';
+  document.getElementById('bdayAge').style.display = 'none';
+  document.getElementById('bdayAge').textContent = '';
+  const giftBox = document.getElementById('bdayGiftBox');
+  giftBox.style.display = 'flex';
+  giftBox.style.opacity = '1';
+  giftBox.style.transform = 'scale(1)';
+  // reset animasi goyang
+  giftBox.style.animation = 'none';
+  setTimeout(() => {
+    giftBox.style.animation = 'giftShake 0.5s ease-in-out 8';
+  }, 10);
+  if (bdayTimer) {
+    clearInterval(bdayTimer);
+    bdayTimer = null;
+  }
+}
+
+let progressInterval = null;
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function updateProgress() {
+  const audio = document.getElementById('bgMusic');
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('musicProgressBar').style.width = pct + '%';
+  document.getElementById('musicCurrentTime').textContent = formatTime(audio.currentTime);
+  document.getElementById('musicDuration').textContent = formatTime(audio.duration);
+}
+
+function seekMusic(e) {
+  const audio = document.getElementById('bgMusic');
+  if (!audio.duration) return;
+  const track = e.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+}
+
+document.getElementById('bgMusic').addEventListener('timeupdate', updateProgress);
+  </script>
+
+</body>
+</html>
